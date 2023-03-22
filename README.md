@@ -8,7 +8,7 @@ For information on how to install Unity packages from GitHub, see the [documenta
 
 When adding this package to Unity use this link:
 
-```asdfasdfasdf```
+```https://github.com/msunde137/ShapeGrammarLanguage.git```
 
 ## Writing Your First Grammar
 
