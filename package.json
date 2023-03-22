@@ -1,0 +1,27 @@
+{
+  "name": "com.cosmicpotato.sgl",
+  "version": "1.0.0",
+  "displayName": "Shape Grammar Language",
+  "description": "A unity package for procedural generation using shape grammars.",
+  "unity": "2021.3",
+  "documentationUrl": "https://github.com/msunde137/ShapeGrammarLanguage/blob/master/README.mdREADME.md",
+  "licensesUrl": "https://github.com/msunde137/ShapeGrammarLanguage/blob/master/LICENSE",
+  "changelogUrl": "",
+  "author": {
+    "name": "Mac Sunde",
+    "email": "imacsunde@gmail.com",
+    "url": "https://github.com/msunde137/ShapeGrammarLanguage"
+  },
+  "samples": [
+    {
+      "displayName": "Simple Tree",
+      "description": "A simple shape grammar example",
+      "path": "Samples~/Configs/SimpleTree"
+    },
+    {
+      "displayName": "Medeival House",
+      "description": "A random medeival house generator. Models not included right now :/",
+      "path": "Samples~/MedeivalHouse"
+    }
+  ]
+}
