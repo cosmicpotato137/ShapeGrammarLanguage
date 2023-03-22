@@ -16,12 +16,12 @@
     {
       "displayName": "Simple Tree",
       "description": "A simple shape grammar example",
-      "path": "./Samples~/SimpleTree"
+      "path": "Samples~/SimpleTree"
     },
     {
-      "displayName": "Medeival House",
+      "displayName": "Medeival House (not working yet)",
       "description": "A random medeival house generator. Models not included right now :/",
-      "path": "./Samples~/MedeivalHouse"
+      "path": "Samples~/MedeivalHouse-not_working_yet"
     }
   ]
 }
