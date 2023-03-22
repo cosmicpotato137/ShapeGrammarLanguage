@@ -1,0 +1,19 @@
+{
+    "name": "cosmicpotato.sgl.Editor",
+    "rootNamespace": "",
+    "references": [
+        "cosmicpotato.sgl.Runtime",
+        "cosmicpotato.vendor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

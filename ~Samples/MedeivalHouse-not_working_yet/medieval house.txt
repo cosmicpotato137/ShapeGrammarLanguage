@@ -1,0 +1,232 @@
+#define maxDepth 9
+#var ww 1
+#var sw .5
+#var fo -1.2
+#var rh 2.7
+
+%%
+
+start:
+{
+	p1()
+}
+
+p1: 
+(1){ end_lg_d() T(0, 0, -2) long_hall_lg() T(0, 0, -2) p2() }
+(1){ end_lg_d() T(0, 0, -2) T(2, 0, -.5) R(0, -90, 0) corner() T(0, 0, -2) p3() }
+(1){ end_lg_d() T(0, 0, -2) 
+	T(1, 0, -.5) S(-1, 1, 1) T(1, 0, 0) R(0, -90, 0) corner() T(0, 0, -2) p3() }
+(1){ end_sm_d() T(0, 0, -2) p3() }
+(1){ end_sm_d() T(0, 0, -2) R(0, 180, 0) corner() R(0, -90, 0) T(0, 0, -2.5) p2() }
+(1){ end_sm_d() T(0, 0, -2) S(-1, 1, 1) R(0, 180, 0) corner() R(0, -90, 0) T(0, 0, -2.5) p2() }
+
+p2:
+(1){ S(1, 1, -1) end_lg() }
+(1){ long_hall_lg() T(0, 0, -2) T(2, 0, -.5) R(0, -90, 0) corner() T(0, 0, -2) p3() }
+(1){ long_hall_lg() T(0, 0, -2) 
+	T(1, 0, -.5) S(-1, 1, 1) T(1, 0, 0) R(0, -90, 0) corner() T(0, 0, -2) p3() }
+
+p3:
+(1){ long_hall_sm() T(0, 0, -2) S(1, 1, -1) end_sm() }
+(1){ S(1, 1, -1) end_sm() }
+(1){ long_hall_sm() R(0, 180, 0) T(0, 0, 2) corner() R(0, -90, 0) T(0, 0, -2.5) p4() }
+(1){ long_hall_sm() R(0, 180, 0) T(0, 0, 2) S(-1, 1, 1) corner() R(0, -90, 0) T(0, 0, -2.5) p4() }
+
+p4:
+(1){ long_hall_lg() T(0, 0, -2) S(1, 1, -1) end_lg() }
+(1){ S(1, 1, -1) end_lg() }
+
+body_sm:
+(1){ long_hall_sm() T(0, 0, -2) body_sm() }
+(.5){ Push() R(0, 180, 0) corner() Pop() R(0, 90, 0) T(0, 0, -2.5) body_lg() }
+(.5){ Push() S(1, 1, -1) corner() Pop() R(0, -90, 0) T(-2, 0, -2.5) body_lg() }
+
+body_lg:
+(1){ long_hall_lg() T(0, 0, -2) body_lg() }
+(.5){ 
+	Push() T(1, 0, -.5) S(-1, 1, 1) T(1, 0, 0) R(0, -90, 0) corner() Pop() 
+	R(0, 90, 0) T(.5, 0, -2) body_sm()
+}
+(1){ S(1, 1, -1) end_lg() }
+(.5){ 
+	Push() T(2, 0, -.5) R(0, -90, 0) corner() Pop() 
+	R(0, -90, 0) T(.5, 0, -2) body_sm()
+}
+
+
+corner:
+{
+	Push()
+	T(-1.5, 0, -1)
+	window*() wall_2m*() post() R(0, 90, 0)
+	wall_2m*() wall_1m*() R(0, 90, 0)
+	T(0, 0, 4) post()
+	Pop()
+
+	R(0, 90, 0)
+	stone_floor()
+	floor()
+	T(-2, 0, 0)
+	stone_floor()
+	floor()
+
+	T(1, 0, 0) R(0, 180, 0)
+	corner_roof()
+}
+
+end_lg:
+{
+	Push()
+	T(-1, 0, -1)
+	wall_2m*() R(0, 90, 0)
+	post() window*() window*() post() R(0, 90, 0)
+	wall_2m*()
+	Pop()
+
+	T(1, 0, 0)
+	stone_floor_lg() 
+	floor_lg()
+
+	wide_roof()
+	wide_roof_end()
+}
+
+end_lg_d:
+{
+	Push()
+	T(-1, 0, -1)
+	wall_2m*() R(0, 90, 0)
+	post() wall_1m*() doorway*() window*() post() R(0, 90, 0)
+	wall_2m*()
+	Pop()
+
+	T(1, 0, 0)
+	stone_floor_lg() 
+	floor_lg()
+
+	wide_roof()
+	wide_roof_end()
+}
+
+end_sm_d: 
+{ 
+	Push()
+	T(-1.5, 0, -1)
+	wall_2m*() R(0, 90, 0) 
+	post() doorway*()
+	wall_2m*() R(0, 90, 0) 
+	post() wall_2m*() R(0, 90, 0) 
+	Pop()
+	
+	R(0, 90, 0)
+	floor()
+	stone_floor()
+	narrow_roof()
+	narrow_roof_end()
+}
+
+end_sm: 
+{ 
+	Push()
+	T(-1.5, 0, -1)
+	wall_2m*() R(0, 90, 0) 
+	post() window*()
+	wall_1m*() R(0, 90, 0) 
+	post() wall_2m*() R(0, 90, 0) 
+	Pop()
+	
+	R(0, 90, 0)
+	floor()
+	stone_floor()
+	narrow_roof()
+	narrow_roof_end()
+}
+
+long_hall_lg:
+{
+	Push()
+	T(-1, 0, -1)
+	window*() R(0, 90, 0)
+	Pop()
+	Push()
+	T(3, 0, -1)
+	window*()
+	Pop()
+
+	T(1, 0, 0)
+	stone_floor_lg() 
+	floor_lg()
+	wide_roof()
+}
+
+long_hall_sm:
+{
+	Push()
+	T(-1.5, 0, -1) wall_2m*()
+	Pop()
+	Push()
+	T(1.5, 0, -1) wall_2m*()
+	Pop()
+	
+	R(0, 90, 0)
+	floor()
+	stone_floor()
+	narrow_roof()
+}
+
+wall_2m:
+(1){ T(0, 0, ww) PlaceShape("wall_wood_2m_1") T(0, 0, ww) }
+(1){ T(0, 0, ww) PlaceShape("wall_wood_2m_2") T(0, 0, ww) }
+(1){ T(0, 0, ww) Push() T(0, -.1, 0) PlaceShape("wall_wood_2m_3") Pop() T(0, 0, ww) }
+
+window: { T(0, 0, ww) PlaceShape("wall_wood_window_2m_1") T(0, 0, ww) }
+
+wall_1m: 
+(1){ T(0, 0, sw) PlaceShape("wall_wood_1m_2") T(0, 0, sw) }
+
+post:
+{ PlaceShape("wooden_post") }
+
+floor_lg:
+{ 	T(0, fo, -.5) PlaceShape("floor_sm") 
+	T(0, 0, 1) PlaceShape("floor_sm")
+}
+
+floor:
+{ T(0, fo, 0) PlaceShape("floor") }
+
+stone_floor:
+{ T(0, -1.4, 0) PlaceShape("floor_rock") }
+
+stone_floor_lg:
+{ 
+	T(0, -1.4, -.5) PlaceShape("floor_rock_sm") 
+	T(0, 0, 1) PlaceShape("floor_rock_sm")
+}
+
+corner_roof:
+{ T(0, rh, 0) PlaceShape("roof_intersection2") }
+
+narrow_roof:
+{ T(0, rh, 0) PlaceShape("roof_narrow3") }
+
+narrow_roof_end:
+{ T(-1.1, rh, 0) PlaceShape("roof_front_narrow") }
+
+wide_roof:
+{ T(0, rh, 0) PlaceShape("roof_wide3") }
+
+wide_roof_end:
+{ T(0, rh, 1) PlaceShape("roof_end_wide") }
+
+doorway:
+{
+	Push()
+	T(0, 0, .3) PlaceShape("wall_wood_entry_1m_1")
+	Pop()
+	Push()
+	T(0, -.35, .67) PlaceShape("wall_wood_door")
+	Pop()
+	Push() T(-.4, -1.4, sw) PlaceShape("stairs") Pop()
+	T(0, 0, 1)
+}

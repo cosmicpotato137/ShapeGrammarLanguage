@@ -1,0 +1,19 @@
+#define maxDepth 9
+#define maxOper 100000
+#define seed 12345
+
+%%
+
+tree: { edge() branch() }
+
+branch: 
+(1){ 
+	T(0, 2, 0) 
+	Push() R(20, 0, 0) edge() R(0, 45, 0) branch() Pop() 
+	R(-20, 0, 0) edge() R(0, -45, 0) branch() 
+}
+(.1){
+	S(1, 1, 1)
+}
+
+edge: { Push() T(0, 1, 0) SS(.2, 2, .2) PlaceShape("Cube") Pop() }
