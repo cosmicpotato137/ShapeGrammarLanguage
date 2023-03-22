@@ -6,7 +6,7 @@
   "unity": "2021.3",
   "documentationUrl": "https://github.com/msunde137/ShapeGrammarLanguage/blob/master/README.mdREADME.md",
   "licensesUrl": "https://github.com/msunde137/ShapeGrammarLanguage/blob/master/LICENSE",
-  "changelogUrl": "",
+  "changelogUrl": "https://github.com/msunde137/ShapeGrammarLanguage/blob/master/CHANGELOG",
   "author": {
     "name": "Mac Sunde",
     "email": "imacsunde@gmail.com",
@@ -16,7 +16,7 @@
     {
       "displayName": "Simple Tree",
       "description": "A simple shape grammar example",
-      "path": "Samples~/Configs/SimpleTree"
+      "path": "Samples~/SimpleTree"
     },
     {
       "displayName": "Medeival House",
