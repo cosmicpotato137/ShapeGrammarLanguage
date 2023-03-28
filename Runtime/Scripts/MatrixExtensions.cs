@@ -19,6 +19,13 @@ namespace cosmicpotato.sgl
             this.scale = scale;
         }
 
+        public Scope(Transform transform)
+        {
+            this.position = transform.position;
+            this.rotation = transform.rotation;
+            this.scale = transform.localScale;
+        }
+
         public Scope(Scope other)
         {
             this.position = other.position;
@@ -261,7 +268,7 @@ namespace cosmicpotato.sgl
         {
             transform.position = scope.position;
             transform.rotation = scope.rotation;
-            transform.localScale = scope.scale; // todo: might need to change
+            transform.localScale = scope.scale;
         }
     }
 }

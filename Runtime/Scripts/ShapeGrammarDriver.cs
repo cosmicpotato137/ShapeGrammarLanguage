@@ -38,7 +38,7 @@ namespace cosmicpotato.sgl
 
             // translate
             Action<SGProdGen, float, float, float> t =
-                (parent, x, y, z) => parent.scope.Translate(new Vector3(x, y, z));
+                (parent, x, y, z) => parent.scope.Translate(Vector3.Scale(new Vector3(x, y, z), transform.lossyScale));
             parser.AddGenerator(new SGGenerator<float, float, float>("T", t));
 
             // translate local
@@ -76,7 +76,7 @@ namespace cosmicpotato.sgl
             parser.AddGenerator(new SGGenerator("Pop", pop));
 
             // subdivide scope
-            Action<SGProdGen, int, Axis, SGRule[]> subdiv = (parent, divs, axis, rules) =>
+            Action<SGProdGen, int, Axis, SGGeneratorBase[]> subdiv = (parent, divs, axis, rules) =>
             {
                 Scope[] scopes = parent.scope.Subdivide(divs, axis);
                 for (int i = 0; i < scopes.Length && i < rules.Length; i++)
@@ -91,10 +91,10 @@ namespace cosmicpotato.sgl
                     SGProducer.opQueue.AddLast(prodGen);
                 }
             };
-            parser.AddGenerator(new SGGenerator<int, Axis, SGRule[]>("Subdiv", subdiv));
+            parser.AddGenerator(new SGGenerator<int, Axis, SGGeneratorBase[]>("Subdiv", subdiv));
 
             // do something at a given depth
-            Action<SGProdGen, int, SGRule[]> dad = (parent, depth, rules) =>
+            Action<SGProdGen, int, SGGeneratorBase[]> dad = (parent, depth, rules) =>
             {
                 if (parent.depth >= depth)
                 {
@@ -105,7 +105,7 @@ namespace cosmicpotato.sgl
                     }
                 }
             };
-            parser.AddGenerator(new SGGenerator<int, SGRule[]>("AtDepth", dad));
+            parser.AddGenerator(new SGGenerator<int, SGGeneratorBase[]>("AtDepth", dad));
 
             // operate on the component faces of an object
             // todo: test this
@@ -162,17 +162,9 @@ namespace cosmicpotato.sgl
         }
 
         // run the parser on a shape grammar file
-        public void ParseGrammar()
+        public SGRoot ParseGrammar()
         {
-            var res = parser.Parse(textFile);
-            if (!res.Success)
-            {
-                Debug.Log("Grammar compilation failure.");
-                foreach (var e in res.Errors)
-                {
-                    Debug.LogWarning(e.Description);
-                }
-            }
+            return parser.Parse(textFile);
         }
 
         // generate a mesh based on the parsed shape grammar
@@ -185,7 +177,7 @@ namespace cosmicpotato.sgl
                     shapeDict.Add(s.name, s);
             }
 
-            parser.RunShapeGrammar(9, 1000000);
+            parser.RunShapeGrammar(9, 1000000, transform);
         }
 
         // clear all generated meshes
@@ -215,11 +207,12 @@ namespace cosmicpotato.sgl
             }
 
             GameObject g = Instantiate(shapeDict[str], transform);
+            g.layer = gameObject.layer;
             //Matrix4x4 m = Matrix4x4.TRS(transform.localPosition, transform.localRotation, transform.localScale);
             var s = new Scope(scope);
+            s.Scale(g.transform.localScale);
             s.Translate(g.transform.localPosition);
             s.Rotate(g.transform.localRotation);
-            s.Scale(g.transform.localScale);
             g.transform.FromScope(s);
 
             objects.AddLast(g);
