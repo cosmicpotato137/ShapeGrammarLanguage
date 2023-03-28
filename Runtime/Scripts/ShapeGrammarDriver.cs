@@ -18,6 +18,7 @@ namespace cosmicpotato.sgl
         protected LinkedList<GameObject> objects;
 
         protected ShapeGrammarParser parser;
+        protected SGRoot parseTree;
 
         public void OnEnable()
         {
@@ -158,13 +159,13 @@ namespace cosmicpotato.sgl
             };
             //parser.AddGenerator(new SGGenerator<SGProdGen>("DecFaces", getFaces));
 
-            parser.Parse(textFile);
+            parseTree = parser.Parse(textFile);
         }
 
         // run the parser on a shape grammar file
-        public SGRoot ParseGrammar()
+        public void ParseGrammar()
         {
-            return parser.Parse(textFile);
+            parseTree = parser.Parse(textFile);
         }
 
         // generate a mesh based on the parsed shape grammar
@@ -177,7 +178,8 @@ namespace cosmicpotato.sgl
                     shapeDict.Add(s.name, s);
             }
 
-            parser.RunShapeGrammar(9, 1000000, transform);
+            parseTree.Generate();
+            //parser.RunShapeGrammar(9, 1000000, transform);
         }
 
         // clear all generated meshes

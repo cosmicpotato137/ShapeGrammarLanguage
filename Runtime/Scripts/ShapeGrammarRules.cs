@@ -35,7 +35,7 @@ namespace cosmicpotato.sgl
 
         public virtual void Produce(SGProdGen prodParent, int depth, int maxDepth, int maxOper, int seed)
         {
-            throw new NotImplementedException("Produce not implemented for some child of SGObj");
+            return;
         }
 
         public virtual void Generate()
@@ -51,8 +51,8 @@ namespace cosmicpotato.sgl
 
     public class SGRoot : SGObj
     {
-        public Dictionary<string, SGExp> globalDefines;
-        public Dictionary<string, SGExp> variables;
+        public Dictionary<string, SGVar> globalDefines;
+        public Dictionary<string, SGVar> variables;
         public Dictionary<string, SGProducer> producers;
         public SGProducer firstProd;
 
@@ -65,10 +65,10 @@ namespace cosmicpotato.sgl
             foreach (var prod in prods)
                 producers.Add(prod.token, prod);
             parent = null;
-            globalDefines = new Dictionary<string, SGExp>();
+            globalDefines = new Dictionary<string, SGVar>();
         }
 
-        public SGRoot(List<SGProducer> prods, Dictionary<string, SGExp> defs) : base("ROOT")
+        public SGRoot(List<SGProducer> prods, Dictionary<string, SGVar> defs) : base("ROOT")
         {
             firstProd = prods[0];
             producers = new Dictionary<string, SGProducer>();
@@ -81,18 +81,18 @@ namespace cosmicpotato.sgl
         public override SGExp FindVar(string name)
         {
             if (variables.ContainsKey(name))
-                return variables[name];
+                return variables[name].value;
             throw new Exception("Variable not found: " + name);
         }
 
         public override void Produce(SGProdGen prodParent, int depth, int maxDepth = 10, int maxOper = 10000, int seed = 12345)
         {
             if (globalDefines.ContainsKey("MAX_DEPTH"))
-                depth = globalDefines["MAX_DEPTH"].Evaluate();
+                depth = globalDefines["MAX_DEPTH"].Get<int>();
             if (globalDefines.ContainsKey("MAX_OPER"))
-                maxOper = globalDefines["MAX_OPER"].Evaluate();
+                maxOper = globalDefines["MAX_OPER"].Get<int>();
             if (globalDefines.ContainsKey("SEED"))
-                seed = globalDefines["SEED"].Evaluate();
+                seed = globalDefines["SEED"].Get<int>();
 
             sgTree.Produce(null, depth, maxDepth, maxOper, seed);
         }
@@ -104,12 +104,17 @@ namespace cosmicpotato.sgl
 
         public override void Init(SGObj parent)
         {
+            if (firstProd.arguments.Count > 0)
+                throw new ArgumentException("The first rule: " + firstProd.token + " must not have arguments!");
+
             this.parent = parent;
             foreach (var prod in producers)
                 prod.Value.Init(this);
+            foreach (var exp in globalDefines)
+                exp.Value.Init(this);
+            foreach (var v in variables)
+                v.Value.Init(this);
 
-            if (firstProd.arguments.Count > 0)
-                throw new ArgumentException("The first rule: " + firstProd.token + " must not have arguments!");
 
             sgTree = new SGProdGen("BEGIN", new List<SGExp>());
             sgTree.prodReference = firstProd;
@@ -180,7 +185,7 @@ namespace cosmicpotato.sgl
     // holds shape grammar variable
     public class SGVar : SGObj
     {
-        private SGExp value;
+        public SGExp value;
 
         public SGVar(string token, SGExp value) : base(token)
         {
@@ -357,7 +362,12 @@ namespace cosmicpotato.sgl
             throw new NotImplementedException();
         }
 
-        public virtual void Generate()
+        public override void Produce(SGProdGen prodParent, int depth, int maxDepth, int maxOper, int seed)
+        {
+            this.prodParent = prodParent;
+        }
+
+        public override void Generate()
         {
             throw new NotImplementedException();
         }
@@ -377,7 +387,7 @@ namespace cosmicpotato.sgl
         public SGProducer prodReference = null;
         public Scope scope;                     // current scope
         private LinkedList<Scope> scopeStack;   // scope history
-        public List<GameObject> gameObjects;        // instantiated GameObjects
+        public List<GameObject> gameObjects;
         public List<SGGeneratorBase> generatorRules;
 
         public SGProdGen(string token, List<SGExp> parameters, bool adoptParentScope = true, bool depthFirst = false) : base(token)
@@ -403,6 +413,7 @@ namespace cosmicpotato.sgl
 
         public override SGGeneratorBase Copy()
         {
+            // TODO recursive copy on children for production tree
             var pg = new SGProdGen(this.token, this.parameters);
             if (scope != null)
                 pg.scope = scope.Copy();
@@ -455,6 +466,7 @@ namespace cosmicpotato.sgl
 
         public override void Generate()
         {
+            if (generatorRules != null)
             foreach (SGGeneratorBase gen in generatorRules)
                 gen.Generate();
         }
@@ -600,7 +612,7 @@ namespace cosmicpotato.sgl
 
         public override void Generate()
         {
-            callback((SGProdGen)parent, (T1)parameters[0].Evaluate(), (T2)parameters[1].Evaluate(), (T3)parameters[2].Evaluate());
+            callback(prodParent, (T1)parameters[0].Evaluate(), (T2)parameters[1].Evaluate(), (T3)parameters[2].Evaluate());
         }
     }
 }

@@ -10,7 +10,7 @@ namespace cosmicpotato.sgl
         private Dictionary<string, SGGeneratorBase> generators;
         private Dictionary<string, SGProducer> producers;
         private Dictionary<string, SGVar> variables;
-        private Dictionary<string, SGVar> prepVars;
+        private Dictionary<string, SGVar> globalDefines;
         private Dictionary<string, Type> sgTypes;
 
         private SGProdGen opTree;
@@ -24,7 +24,11 @@ namespace cosmicpotato.sgl
             generators = new Dictionary<string, SGGeneratorBase>();
             producers = new Dictionary<string, SGProducer>();
             variables = new Dictionary<string, SGVar>();
-            prepVars = new Dictionary<string, SGVar>();
+            globalDefines = new Dictionary<string, SGVar>();
+            globalDefines.Add("MAX_OPER", new SGVar("MAX_OPER", new SGNumber(null, 10000)));
+            globalDefines.Add("MAX_DEPTH", new SGVar("MAX_DEPTH", new SGNumber(null, 10)));
+            globalDefines.Add("SEED", new SGVar("SEED", new SGNumber(null, 12345)));
+
             opQueue = new LinkedList<SGGeneratorBase>();
 
             // types for sg language
@@ -36,11 +40,11 @@ namespace cosmicpotato.sgl
             sgTypes.Add("sggen", typeof(SGProdGen));
 
             //SGVar depth = new SGVar("maxDepth", -1);
-            //prepVars.Add(depth.token, depth);
+            //globalDefines.Add(depth.token, depth);
             //SGVar oper = new SGVar("maxOper", -1);
-            //prepVars.Add(oper.token, oper);
+            //globalDefines.Add(oper.token, oper);
             //SGVar seed = new SGVar("seed", -1);
-            //prepVars.Add(seed.token, seed);
+            //globalDefines.Add(seed.token, seed);
         }
 
         // parse a text file
@@ -48,10 +52,6 @@ namespace cosmicpotato.sgl
         {
             producers.Clear();
             variables.Clear();
-
-            //prepVars["seed"].Set(-1);
-            //prepVars["maxOper"].Set(-1);
-            //prepVars["maxDepth"].Set(-1);
 
             var pr = parser.Parse<SGRoot>(text.text);
             if (!pr.Success)
@@ -65,6 +65,8 @@ namespace cosmicpotato.sgl
             }
 
             SGRoot root = pr.Value;
+            root.globalDefines = globalDefines;
+            root.variables = variables;
             root.Init(null);
             root.Produce(null, 0, 10, 10000);
 
@@ -72,34 +74,34 @@ namespace cosmicpotato.sgl
         }
 
         // run the currently parsed shape grammar
-        public void RunShapeGrammar(int maxDepth, int maxOper = 100000, Transform parent = null)
-        {
-            opQueue.Clear();
+        //public void RunShapeGrammar(int maxDepth, int maxOper = 100000, Transform parent = null)
+        //{
+        //    opQueue.Clear();
 
-            if (prepVars.ContainsKey("maxDepth") && prepVars["maxDepth"].Get<int>() > 0)
-                maxDepth = prepVars["maxDepth"].Get<int>();
-            if (prepVars.ContainsKey("maxOper") && prepVars["maxOper"].Get<int>() > 0)
-                maxOper = prepVars["maxOper"].Get<int>();
-            if (prepVars.ContainsKey("seed") && prepVars["seed"].Get<int>() > 0)
-                SGProducer.rg = new System.Random(prepVars["seed"].Get<int>());
+        //    if (globalDefines.ContainsKey("maxDepth") && globalDefines["maxDepth"].Get<int>() > 0)
+        //        maxDepth = globalDefines["maxDepth"].Get<int>();
+        //    if (globalDefines.ContainsKey("maxOper") && globalDefines["maxOper"].Get<int>() > 0)
+        //        maxOper = globalDefines["maxOper"].Get<int>();
+        //    if (globalDefines.ContainsKey("seed") && globalDefines["seed"].Get<int>() > 0)
+        //        SGProducer.rg = new System.Random(globalDefines["seed"].Get<int>());
 
-            SGProducer.rg = new System.Random();
+        //    SGProducer.rg = new System.Random();
 
-            //SGGeneratorBase.maxDepth = maxDepth;
-            if (parent == null)
-                opTree.scope = Scope.identity;
-            else
-                opTree.scope = new Scope(parent.position, parent.rotation, Vector3.one);
-            opQueue.AddLast(opTree);
+        //    //SGGeneratorBase.maxDepth = maxDepth;
+        //    if (parent == null)
+        //        opTree.scope = Scope.identity;
+        //    else
+        //        opTree.scope = new Scope(parent.position, parent.rotation, Vector3.one);
+        //    opQueue.AddLast(opTree);
 
-            int i = 0;
-            opQueue.First.Value.Generate();
-            while (opQueue.Count > 0 && i < maxOper)
-            {
-                opQueue.RemoveFirst();
-                i++;
-            }
-        }
+        //    int i = 0;
+        //    opQueue.First.Value.Generate();
+        //    while (opQueue.Count > 0 && i < maxOper)
+        //    {
+        //        opQueue.RemoveFirst();
+        //        i++;
+        //    }
+        //}
 
         // add generator to the list of expected generators
         public void AddGenerator(SGGeneratorBase rule)
@@ -108,28 +110,34 @@ namespace cosmicpotato.sgl
         }
 
         // add producer to the list of expected producers
-        public void AddProducer(SGProducer producer)
-        {
-            producers.Add(producer.token, producer);
-        }
+        //public void AddProducer(SGProducer producer)
+        //{
+        //    producers.Add(producer.token, producer);
+        //}
 
         // check if name exists in any context
         public bool NameExsists(string token)
         {
             return producers.ContainsKey(token) || generators.ContainsKey(token) ||
-                variables.ContainsKey(token) || prepVars.ContainsKey(token) ||
+                variables.ContainsKey(token) || globalDefines.ContainsKey(token) ||
                 sgTypes.ContainsKey(token);
         }
 
         // enum of all symbols to expect in the grammar
         private enum ELang
         {
-            // production rules
-            START, Rule, GenRuleList, GenRule, ExpList, Exp, ProdRule, ProdRuleList,
-            Var, VarList, Array, GenRuleLists,
+            // AST nodes
+            START, 
+            ProdRuleList, ProdRule,             // producers
+            GenRuleLists, GenRuleList, GenRule, // generators
+            ExpList, Exp,                       // expressions
+            VarDef, VarDefList,                 // global defines/variables
+            Array,
             // symbols
             Ignore, LParen, RParen, Number, Name, RArrow, Colon, Comma, Break,
-            Pound, Equals, LCBrac, RCBrac, LBrac, RBrac, String, Star, Quote
+            Pound, Equals, LCBrac, RCBrac, LBrac, RBrac, String, Star, Quote,
+            // ignore
+            Comment
         }
 
         public void CompileParser()
@@ -138,6 +146,7 @@ namespace cosmicpotato.sgl
             var tokens = new LexerDefinition<ELang>(new Dictionary<ELang, TokenRegex>
             {
                 [ELang.Ignore] = "[\\s\\n]+",
+                [ELang.Comment] = "//[^\n]*\n",
                 [ELang.Name] = @"[A-Za-z_][a-zA-Z0-9_]*",
                 [ELang.String] = "\"[^\"]*\"", // todo: fix this
                 [ELang.LParen] = "\\(",
@@ -161,7 +170,7 @@ namespace cosmicpotato.sgl
                 [ELang.START] = new Token[][]
                 {
                 new Token[] { ELang.ProdRuleList, new Op(o => o[0] = new SGRoot(o[0])) },
-                new Token[] { ELang.VarList, ELang.Break, ELang.ProdRuleList, new Op(o => o[0] = new SGRoot(o[2])) }
+                new Token[] { ELang.VarDefList, ELang.Break, ELang.ProdRuleList, new Op(o => o[0] = new SGRoot(o[2])) }
                 },
                 // list of production rules
                 [ELang.ProdRuleList] = new Token[][]
@@ -374,13 +383,13 @@ namespace cosmicpotato.sgl
                 },
 
                 // matches a list of variables
-                [ELang.VarList] = new Token[][]
+                [ELang.VarDefList] = new Token[][]
                 {
-                new Token[] { ELang.Var },
-                new Token[] { ELang.VarList, ELang.Var }
+                new Token[] { ELang.VarDef },
+                new Token[] { ELang.VarDefList, ELang.VarDef }
                 },
                 // matches a single define or var
-                [ELang.Var] = new Token[][]
+                [ELang.VarDef] = new Token[][]
                 {
                 new Token[] { ELang.Pound, "\\s*var\\s+", ELang.Name, ELang.Exp,
                     new Op(o =>
@@ -389,17 +398,18 @@ namespace cosmicpotato.sgl
                         {
                             throw new Exception($"Name already defined: {o[2]}");
                         }
-                        var v = new SGVar(o[2], o[3]);
-                        variables.Add(v.token, v);
+                        variables.Add(o[2], new SGVar(o[2], o[3]));
                     })
                 },
                 new Token[] { ELang.Pound, "\\s*define\\s+", ELang.Name, ELang.Exp,
                     new Op(o =>
                     {
-                        if (prepVars.ContainsKey(o[2]))
-                            prepVars[o[2]].Set(o[3]);
+                        if (globalDefines.ContainsKey(o[2]))
+                        {
+                            globalDefines[o[2]].Set(o[3]);
+                        }
                         else
-                            Debug.LogWarning($"Preprocessing var not found: {o[2]}");
+                            Debug.LogWarning($"Global definition not found: {o[2]}");
                     })
                 }
                 }
