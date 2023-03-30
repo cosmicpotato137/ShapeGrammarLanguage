@@ -20,12 +20,12 @@ namespace cosmicpotato.sgl
         protected SGObj(SGObj other)
         {
             this.token = other.token;
+            this.parent = other.parent;
         }
 
         public virtual void Init(SGObj parent)
         {
             this.parent = parent;
-            return;
         }
 
         public virtual SGExp FindVar(string name)
@@ -33,7 +33,7 @@ namespace cosmicpotato.sgl
             return parent.FindVar(name);
         }
 
-        public virtual void Produce(SGProdGen prodParent, int depth, int maxDepth, int maxOper, int seed)
+        public virtual void Produce(SGProdGen prodParent, int depth, int maxDepth, int seed)
         {
             return;
         }
@@ -47,6 +47,16 @@ namespace cosmicpotato.sgl
         {
             return parent.GetProdReference(name);
         }
+
+        protected virtual float GetRandomFloat(float a, float b)
+        {
+            return parent.GetRandomFloat(a, b);
+        }
+
+        protected virtual int GetRandomInt(int a, int b)
+        {
+            return parent.GetRandomInt(a, b);
+        }
     }
 
     public class SGRoot : SGObj
@@ -57,6 +67,9 @@ namespace cosmicpotato.sgl
         public SGProducer firstProd;
 
         public SGProdGen sgTree;
+        private Scope startScope = null;
+
+        public System.Random rg;
 
         public SGRoot(List<SGProducer> prods) : base("ROOT")
         {
@@ -78,6 +91,11 @@ namespace cosmicpotato.sgl
             globalDefines = defs;
         }
 
+        public void SetStartScope(Scope scope)
+        {
+            startScope = scope;
+        }
+
         public override SGExp FindVar(string name)
         {
             if (variables.ContainsKey(name))
@@ -85,20 +103,27 @@ namespace cosmicpotato.sgl
             throw new Exception("Variable not found: " + name);
         }
 
-        public override void Produce(SGProdGen prodParent, int depth, int maxDepth = 10, int maxOper = 10000, int seed = 12345)
+        public override void Produce(SGProdGen prodParent, int depth, int maxDepth = 10, int seed = -1)
         {
             if (globalDefines.ContainsKey("MAX_DEPTH"))
-                depth = globalDefines["MAX_DEPTH"].Get<int>();
-            if (globalDefines.ContainsKey("MAX_OPER"))
-                maxOper = globalDefines["MAX_OPER"].Get<int>();
+                maxDepth = globalDefines["MAX_DEPTH"].Get<int>();
             if (globalDefines.ContainsKey("SEED"))
                 seed = globalDefines["SEED"].Get<int>();
 
-            sgTree.Produce(null, depth, maxDepth, maxOper, seed);
+            if (seed < 0)
+                rg = new System.Random();
+            else
+                rg = new System.Random(seed);
+
+            sgTree.Produce(null, depth, maxDepth, seed);
         }
 
         public override void Generate()
         {
+            // TODO: add parent Transform to everything!
+            sgTree.scope = Scope.identity.Copy();
+            if (startScope != null)
+                sgTree.scope = startScope;
             sgTree.Generate();
         }
 
@@ -115,10 +140,10 @@ namespace cosmicpotato.sgl
             foreach (var v in variables)
                 v.Value.Init(this);
 
-
             sgTree = new SGProdGen("BEGIN", new List<SGExp>());
             sgTree.prodReference = firstProd;
-            sgTree.scope = Scope.identity;
+            sgTree.scope = Scope.identity.Copy();
+            sgTree.Init(this);
         }
 
         public override SGProducer GetProdReference(string name)
@@ -127,15 +152,66 @@ namespace cosmicpotato.sgl
                 return producers[name];
             throw new KeyNotFoundException("No rule: " + name + " found");
         }
+
+        protected override float GetRandomFloat(float a, float b)
+        {
+            return (float)(rg.NextDouble() * (double)b + (double)a);
+        }
+
+        protected override int GetRandomInt(int a, int b)
+        {
+            return rg.Next(a, b);
+        }
     }
 
     public class SGExp : SGObj
     {
+        public SGProdGen prodParent;
+
         public SGExp(string token) : base(token) { }
+
+        public SGExp(SGExp other) : base(other)
+        {
+            this.prodParent = other.prodParent;
+        }
 
         public virtual dynamic Evaluate()
         {
             throw new NotImplementedException();
+        }
+
+        public override void Produce(SGProdGen prodParent, int depth, int maxDepth, int seed)
+        {
+            this.prodParent = prodParent;
+        }
+
+        public virtual SGExp Copy()
+        {
+            return new SGExp(this);
+        }
+    }
+
+    public class SGBool : SGExp
+    {
+        bool value;
+        public SGBool(string token, bool b) : base(token)
+        {
+            value = b;
+        }
+
+        public SGBool(SGBool other) : base(other)
+        {
+            this.value = other.value;
+        }
+
+        public override SGExp Copy()
+        {
+            return new SGBool(this);
+        }
+
+        public override dynamic Evaluate()
+        {
+            return value;
         }
     }
 
@@ -146,6 +222,16 @@ namespace cosmicpotato.sgl
         public SGNumber(string token, float number) : base(token)
         {
             value = number;
+        }
+
+        public SGNumber(SGNumber other) : base(other)
+        {
+            this.value = other.value;
+        }
+
+        public override SGExp Copy()
+        {
+            return new SGNumber(this);
         }
 
         public override dynamic Evaluate()
@@ -162,6 +248,16 @@ namespace cosmicpotato.sgl
             value = str;
         }
 
+        public SGString(SGString other) : base(other)
+        {
+            this.value = other.value;
+        }
+
+        public override SGExp Copy()
+        {
+            return new SGString(this);
+        }
+
         public override dynamic Evaluate()
         {
             return value;
@@ -171,14 +267,90 @@ namespace cosmicpotato.sgl
     public class SGInlineVar : SGExp
     {
         string name;
+        dynamic value = null;
+
         public SGInlineVar(string token, string name) : base(token)
         {
             this.name = name;
         }
 
+        public SGInlineVar(SGInlineVar other) : base(other)
+        {
+            this.name = other.name;
+        }
+
+        public override SGExp Copy()
+        {
+            return new SGInlineVar(this);
+        }
+
         public override dynamic Evaluate()
         {
-            return FindVar(name).Evaluate();
+            if (value == null)
+                value = prodParent.FindVar(name).Evaluate();
+            return value;
+        }
+    }
+
+    public class SGOpExp : SGExp
+    {
+        public SGExp exp1, exp2;
+        public string oper;
+        public dynamic value;
+
+        public SGOpExp(SGExp e1, string op, SGExp e2) : base(op)
+        {
+            exp1 = e1;
+            exp2 = e2;
+            oper = op;
+        }
+
+        public SGOpExp(SGOpExp other) : base(other)
+        {
+            exp1 = other.exp1.Copy();
+            exp2 = other.exp2.Copy();
+            oper = other.oper;
+        }
+
+        public override SGExp Copy()
+        {
+            return new SGOpExp(this);
+        }
+
+        public override dynamic Evaluate()
+        {
+            if (value != null)
+                return value;
+            switch (oper)
+            {
+                case "==": value = exp1.Evaluate() == exp2.Evaluate(); break;
+                case "!=": value = exp1.Evaluate() != exp2.Evaluate(); break;
+                case "<=": value = exp1.Evaluate() <= exp2.Evaluate(); break;
+                case ">=": value = exp1.Evaluate() >= exp2.Evaluate(); break;
+                case ">":  value = exp1.Evaluate() > exp2.Evaluate(); break;
+                case "<":  value = exp1.Evaluate() < exp2.Evaluate(); break;
+                case "+":  value = exp1.Evaluate() + exp2.Evaluate(); break;
+                case "-":  value = exp1.Evaluate() - exp2.Evaluate(); break;
+                case "*":  value = exp1.Evaluate() * exp2.Evaluate(); break;
+                case "/":  value = exp1.Evaluate() / exp2.Evaluate(); break;
+                case "**": value = Math.Pow(exp1.Evaluate(), exp2.Evaluate()); break;
+                default: throw new InvalidOperationException("Operator '" + oper + "' not recognized");
+            }
+            return value;
+        }
+
+        public override void Init(SGObj parent)
+        {
+            base.Init(parent);
+            exp1.Init(this);
+            exp2.Init(this);
+        }
+
+        public override void Produce(SGProdGen prodParent, int depth, int maxDepth, int seed)
+        {
+            this.prodParent = prodParent;
+            exp1.Produce(prodParent, depth, maxDepth, seed);
+            exp2.Produce(prodParent, depth, maxDepth, seed);
         }
     }
 
@@ -213,66 +385,68 @@ namespace cosmicpotato.sgl
     {
         // list of one or more sets of rules to follow
         public List<LinkedList<SGGeneratorBase>> ruleLists;
-        public Dictionary<SGExp, int> arguments;
+        public Dictionary<string, int> arguments;
+        public SGExp condition;
 
         // non-normalized probability that a rule gets chosen
-        public List<SGExp> p;
+        public List<SGExp> probs;
 
-        // reference to the external queue of operations
-        public static LinkedList<SGGeneratorBase> opQueue;
-        // random number generator
-        public static System.Random rg = new System.Random(1234);
-
-
-        public SGProducer(string token, LinkedList<SGGeneratorBase> ruleList, List<SGExp> args = null) : base(token)
+        public SGProducer(string token, LinkedList<SGGeneratorBase> ruleList, List<string> args = null, SGExp cond = null) : base(token)
         {
             this.ruleLists = new List<LinkedList<SGGeneratorBase>> { ruleList };
-            p = new List<SGExp>();
+            probs = new List<SGExp>();
 
-            arguments = new Dictionary<SGExp, int>();
+            arguments = new Dictionary<string, int>();
             if (args != null && args.Count > 0)
                 for (int i = 0; i < args.Count; i++)
                     arguments.Add(args[i], i);
+            if (cond == null)
+                cond = new SGBool(null, true);
+            condition = cond;
         }
         
-        public SGProducer(string token, List<LinkedList<SGGeneratorBase>> ruleLists, List<SGExp> pList, List<SGExp> args = null) : base(token)
+        public SGProducer(string token, List<LinkedList<SGGeneratorBase>> ruleLists, List<SGExp> pList, List<string> args = null, SGExp cond = null) : base(token)
         {
             this.ruleLists = ruleLists;
-            p = pList;
+            probs = pList;
 
-            arguments = new Dictionary<SGExp, int>();
+            arguments = new Dictionary<string, int>();
             if (args != null && args.Count > 0)
                 for (int i = 0; i < args.Count; i++)
                     arguments.Add(args[i], i);
+            if (cond == null)
+                cond = new SGBool(null, true);
+            condition = cond;
         }
         
         public SGProducer(SGProducer other) : base(other)
         {
             this.ruleLists = other.ruleLists;
-            this.p = other.p;
+            this.probs = other.probs;
+            this.condition = other.condition;
         }
 
         public List<SGGeneratorBase> GetChildren()
         {
             // get the index of the set of rules to call
             int idx = 0;
-            if (p.Count > 0)
+            if (probs.Count > 0)
             {
                 // normalize probabilities
                 // todo: maybe optimize this?
                 List<float> probs = new List<float>();
                 float mag = 0;
-                foreach (SGExp f in p)
+                foreach (SGExp f in this.probs)
                     mag += f.Evaluate();
                 float tot = 0;
-                for (int i = 0; i < p.Count; i++)
+                for (int i = 0; i < this.probs.Count; i++)
                 {
-                    probs.Add(tot + p[i].Evaluate() / mag);
-                    tot += p[i].Evaluate() / mag;
+                    probs.Add(tot + this.probs[i].Evaluate() / mag);
+                    tot += this.probs[i].Evaluate() / mag;
                 }
 
                 // get index based on a random number
-                float rand = (float)rg.NextDouble();
+                float rand = GetRandomFloat(0.0f, 1.0f); // todo: optimize?
                 while (probs[idx] < rand)
                     idx++;
                 if (idx == probs.Count)
@@ -294,40 +468,23 @@ namespace cosmicpotato.sgl
         public override void Init(SGObj parent)
         {
             this.parent = parent;
+            condition.Init(this);
             foreach (var lst in ruleLists)
                 foreach (SGGeneratorBase gen in lst)
                     gen.Init(this);
-            foreach (var exp in p)
+            foreach (var exp in probs)
                 exp.Init(this);
-            foreach (var arg in arguments)
-                arg.Key.Init(this);
         }
 
         // returns -1 for no argument; otherwise returns the index
         // of the argument in the parameter list
         public int ContainsArgument(string name)
         {
-            foreach (SGExp arg in arguments.Keys)
-                if ((string)arg.Evaluate() == name)
-                    return arguments[arg];
+            if (arguments.ContainsKey(name))
+                return arguments[name];
             return -1;
         }
     }
-
-    // base class for all 'called' items in production rules
-    //public class SGG : SGObj
-    //{
-
-
-    //    protected SGRule(string token) : base(token)
-    //    {
-    //    }
-
-    //    protected SGRule(SGRule other) : base(other)
-    //    {
-    //    }
-    //}
-
 
     // all rules that don't directly reference producers
     // used for placing geometry and manipulating scopes
@@ -346,8 +503,11 @@ namespace cosmicpotato.sgl
 
         public SGGeneratorBase(SGGeneratorBase other) : base(other)
         {
-            this.parameters = other.parameters;
             this.parent = other.parent;
+            this.depth = other.depth;
+            this.parameters = new List<SGExp>();
+            foreach (SGExp param in other.parameters)
+                this.parameters.Add(param.Copy());
         }
 
         public override void Init(SGObj parent)
@@ -362,29 +522,35 @@ namespace cosmicpotato.sgl
             throw new NotImplementedException();
         }
 
-        public override void Produce(SGProdGen prodParent, int depth, int maxDepth, int maxOper, int seed)
+        public override void Produce(SGProdGen prodParent, int depth, int maxDepth, int seed)
         {
             this.prodParent = prodParent;
+            foreach (var p in parameters)
+                p.Produce(this.prodParent, depth, maxDepth, seed);
         }
 
         public override void Generate()
         {
             throw new NotImplementedException();
         }
+
+        public override SGExp FindVar(string name)
+        {
+            return prodParent.FindVar(name);
+        }
     }
 
     // inline call to a production rule
     public class SGProdGen : SGGeneratorBase
     {
-        // function find the producer at runtime
-        //public Func<SGProducer> callback;
-
         // set producer to depth first or breadth first
         public bool depthFirst { get; private set; }
         // start with the parent's scope?
         public bool adoptParentScope;
 
         public SGProducer prodReference = null;
+        public SGExp condition = null;
+        public List<SGExp> probs;
         public Scope scope;                     // current scope
         private LinkedList<Scope> scopeStack;   // scope history
         public List<GameObject> gameObjects;
@@ -403,50 +569,86 @@ namespace cosmicpotato.sgl
         public SGProdGen(SGProdGen other) : base(other)
         {
             //this.callback = other.callback;
-            this.scope = other.scope.Copy();
+            // TODO recursive copy on children for production tree
+            if (scope != null)
+                this.scope = other.scope.Copy();
             this.scopeStack = other.scopeStack;
             this.gameObjects = other.gameObjects;
             this.depthFirst = other.depthFirst;
-            this.depth = other.depth;
-            this.parameters = other.parameters;
+            this.adoptParentScope = other.adoptParentScope;
         }
 
         public override SGGeneratorBase Copy()
         {
-            // TODO recursive copy on children for production tree
-            var pg = new SGProdGen(this.token, this.parameters);
-            if (scope != null)
-                pg.scope = scope.Copy();
-            pg.scopeStack = scopeStack;
-            pg.gameObjects = gameObjects;
-            pg.parent = parent;
-            pg.depth = depth;
-            pg.depthFirst = depthFirst;
-            pg.adoptParentScope = adoptParentScope;
-            return pg;
+            return new SGProdGen(this);
         }
 
-        public override void Produce(SGProdGen prodParent, int depth, int maxDepth, int maxOper, int seed)
+        public override void Produce(SGProdGen prodParent, int depth, int maxDepth, int seed)
         {
             if (parameters.Count != GetProdReference(token).arguments.Count)
                 throw new MissingMethodException("Incorrect number of arguments in rule: " + token);
-
-            this.prodParent = prodParent;
             // end if max depth has been reached
             if (depth > maxDepth)
                 return;
 
-            // get parent and update scope
-            if (parent != null && adoptParentScope)
+            base.Produce(prodParent, depth, maxDepth, seed);
+            this.prodParent = prodParent;
+
+            // copy condition from producer
+            condition = GetProdReference(token).condition.Copy();
+            condition.Produce(this, depth, maxDepth, seed);
+            if (condition.Evaluate() == false)
+                return;
+
+            // copy probabilities from producer
+            probs = new List<SGExp>();
+            foreach (var p in GetProdReference(token).probs)
             {
-                this.scope = prodParent.scope.Copy();
-                this.gameObjects = prodParent.gameObjects;
+                SGExp newp = p.Copy();
+                newp.Produce(this, depth, maxDepth, seed);
+                probs.Add(newp);
             }
 
-            generatorRules = GetProdReference(token).GetChildren();
+            // get the index of the set of rules to call
+            int idx = 0;
+            if (probs.Count > 0)
+            {
+                // normalize probabilities
+                // todo: maybe optimize this?
+                var p = new List<float>();
+                float mag = 0;
+                foreach (SGExp f in probs)
+                    mag += f.Evaluate();
+                float tot = 0;
+                for (int i = 0; i < probs.Count; i++)
+                {
+                    p.Add(tot + probs[i].Evaluate() / mag);
+                    tot += probs[i].Evaluate() / mag;
+                }
 
-            foreach (SGGeneratorBase gen in generatorRules)
-                gen.Produce(this, depth + 1, maxDepth, maxOper, seed);
+                // get index based on a random number
+                float rand = GetRandomFloat(0.0f, 1.0f); // todo: optimize?
+                while (p[idx] < rand)
+                    idx++;
+                if (idx == probs.Count)
+                    idx--;
+            }
+
+            // evaluate depth first
+            // todo: add add multiple queues for handling priority
+            generatorRules = new List<SGGeneratorBase>();
+            foreach (SGGeneratorBase rule in GetProdReference(token).ruleLists[idx])
+            {
+                var r = rule.Copy();
+                r.Produce(this, depth + 1, maxDepth, seed);
+                generatorRules.Add(r);
+            }
+
+
+            //generatorRules = GetProdReference(token).GetChildren();
+
+            //foreach (SGGeneratorBase gen in generatorRules)
+            //    gen.Produce(this, depth + 1, maxDepth, seed);
         }
 
         public override SGProducer GetProdReference(string name)
@@ -461,12 +663,21 @@ namespace cosmicpotato.sgl
             var i = GetProdReference(token).ContainsArgument(name);
             if (i >= 0)
                 return parameters[i];
-            return parent.FindVar(name);
+             return parent.FindVar(name);
         }
 
         public override void Generate()
         {
-            if (generatorRules != null)
+            if (generatorRules == null)
+                return;
+
+            // get parent and update scope
+            if (prodParent != null && adoptParentScope)
+            {
+                this.scope = prodParent.scope.Copy();
+                this.gameObjects = prodParent.gameObjects;
+            }
+
             foreach (SGGeneratorBase gen in generatorRules)
                 gen.Generate();
         }
@@ -603,11 +814,7 @@ namespace cosmicpotato.sgl
 
         public override SGGeneratorBase Copy()
         {
-            var n = new SGGenerator<T1, T2, T3>(token, callback);
-            n.parent = parent;
-            n.depth = depth;
-            n.parameters = parameters;
-            return n;
+            return new SGGenerator<T1, T2, T3>(this);
         }
 
         public override void Generate()
