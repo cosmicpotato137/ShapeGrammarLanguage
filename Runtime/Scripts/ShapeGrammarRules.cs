@@ -331,7 +331,7 @@ namespace cosmicpotato.sgl
                 case "<":  value = exp1.Evaluate() < exp2.Evaluate(); break;
                 case "+":  value = exp1.Evaluate() + exp2.Evaluate(); break;
                 case "-":  value = exp1.Evaluate() - exp2.Evaluate(); break;
-                case "*":  value = exp1.Evaluate() * exp2.Evaluate(); break;
+                case "*":  value = (float)Convert.ToDouble(exp1.Evaluate()) * (float)Convert.ToDouble(exp2.Evaluate()); break;
                 case "/":  value = exp1.Evaluate() / exp2.Evaluate(); break;
                 case "**": value = Math.Pow(exp1.Evaluate(), exp2.Evaluate()); break;
                 default: throw new InvalidOperationException("Operator '" + oper + "' not recognized");
@@ -618,12 +618,12 @@ namespace cosmicpotato.sgl
                 var p = new List<float>();
                 float mag = 0;
                 foreach (SGExp f in probs)
-                    mag += f.Evaluate();
+                    mag += (float)Convert.ToDouble(f.Evaluate());
                 float tot = 0;
                 for (int i = 0; i < probs.Count; i++)
                 {
-                    p.Add(tot + probs[i].Evaluate() / mag);
-                    tot += probs[i].Evaluate() / mag;
+                    p.Add(tot + (float)Convert.ToDouble(probs[i].Evaluate()) / mag);
+                    tot += (float)Convert.ToDouble(probs[i].Evaluate()) / mag;
                 }
 
                 // get index based on a random number

@@ -38,7 +38,7 @@ namespace cosmicpotato.sgl
             return new Scope(this.position, this.rotation, this.scale);
         }
 
-        Matrix4x4 GetMatrix()
+        public Matrix4x4 GetMatrix()
         {
             return Matrix4x4.TRS(position, rotation, scale);
         }
@@ -67,6 +67,16 @@ namespace cosmicpotato.sgl
                 ));
 
             this.rotation *= Quaternion.AngleAxis(angle, axis);
+        }
+
+        public void SetRotation(Vector3 rot)
+        {
+            this.rotation = Quaternion.Euler(rot);
+        }
+
+        public void SetRotation(Quaternion rot)
+        {
+            this.rotation = rot;
         }
 
         public void Scale(Vector3 scale)

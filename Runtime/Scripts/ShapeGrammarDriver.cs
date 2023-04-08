@@ -67,7 +67,23 @@ namespace cosmicpotato.sgl
                 parent.scope.Rotate(new Vector3(x, y, z));
             };
             parser.AddGenerator(new SGGenerator<float, float, float>("R", r));
-
+            // set rotation
+            Action<SGProdGen, float, float, float> sr = (parent, x, y, z) =>
+            {
+                parent.scope.SetRotation(new Vector3(x, y, z));
+            };
+            parser.AddGenerator(new SGGenerator<float, float, float>("SR", sr));
+            // rotate to vertical
+            Action<SGProdGen> rv = (parent) =>
+            {
+                Vector3 up = parent.scope.rotation * Vector3.up;
+                if (up == Vector3.up)
+                    return;
+                Vector3 right = Vector3.Normalize(Vector3.Cross(up, Vector3.up));
+                Quaternion newrot = Quaternion.LookRotation(Vector3.Cross(right, up), up);
+                parent.scope.SetRotation(newrot);
+            };
+            parser.AddGenerator(new SGGenerator("RV", rv));
             // scale
             Action<SGProdGen, float, float, float> s =
                 (parent, x, y, z) =>

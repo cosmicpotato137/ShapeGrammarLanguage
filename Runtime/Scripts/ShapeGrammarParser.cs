@@ -149,7 +149,7 @@ namespace cosmicpotato.sgl
             // list of regular expressions matching tokens
             var tokens = new LexerDefinition<ELang>(new Dictionary<ELang, TokenRegex>
             {
-                [ELang.Ignore] =    "([\\s\\n]+|//[^\n]*\n)",
+                [ELang.Ignore] =    @"([\s\n]+|\/\/[^\n]*|\/\*(\*(?!\/)|[^*])*\*\/)",
                 [ELang.Name] =      @"[A-Za-z_][a-zA-Z0-9_]*",
                 [ELang.String] =    "\"[^\"]*\"", // todo: fix this
                 [ELang.LParen] =    @"\(",
