@@ -1,6 +1,6 @@
 {
   "name": "com.cosmicpotato.sgl",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "displayName": "Shape Grammar Language",
   "description": "A unity package for procedural generation using shape grammars.",
   "unity": "2021.3",
