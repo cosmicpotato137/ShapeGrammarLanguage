@@ -44,8 +44,6 @@ Once you have your first grammar, it is run by unity using the ShapeGrammarDrive
 
 ## 4 Language Features
 
-
-
 ### 4.1 Static Variables
 
 There are two types of static variables in SGL. The first are production definitions. These are defined using the ```#define``` keyword, and must be one of the following: 
