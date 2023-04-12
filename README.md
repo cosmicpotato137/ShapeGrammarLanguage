@@ -32,12 +32,9 @@ Shape Grammar files are text files formatted with a list of preprocessor definit
 
 ### Shape Grammar Driver
 
-Once you have your first grammar, it is run by unity using the ShapeGrammarDriver script. 
+Once you have your first grammar, it is run by unity using the ShapeGrammarDriver script. The list of shapes contains all prefabs which shape grammars, specifically the PlaceShape generator has access to. The Shape Grammar file is input in the text file field.
 
-<div style="display: flex flex-direction: row">
-  <img src="./Samples~/ShapeGrammarDriverInspector.JPG" alt="Shape Grammar Driver Inspector" width="400"/>
-  <p>asdfha;ldfahdfk</p>
-</div>
+<img src="./Samples~/ShapeGrammarDriverInspector.JPG" alt="Shape Grammar Driver Inspector" width="400"/>
 
 ## Language Features
 
