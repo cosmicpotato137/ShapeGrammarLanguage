@@ -34,13 +34,33 @@ Shape Grammar files are text files formatted with a list of preprocessor definit
 
 Once you have your first grammar, it is run by unity using the ShapeGrammarDriver script. The list of shapes contains all prefabs which shape grammars, specifically the PlaceShape generator has access to. The Shape Grammar file is input in the text file field.
 
-<img src="./Samples~/ShapeGrammarDriverInspector.JPG" alt="Shape Grammar Driver Inspector" width="400"/>
+<img src="./Samples~/ShapeGrammarDriverInspector.JPG" alt="Shape Grammar Driver Inspector" width="400" style="justify-self: center"/>
 
 ## Language Features
 
+
+
+### Static Variables
+
+There are two types of static variables in SGL. The first are production definitions. These are defined using the ```#define``` keyword, and must be one of the following: 
+
+- ```MAX_DEPTH```: the maximum recursive depth of the Shape Grammar.
+- ```MAX_OPER```: the maximum number of generator operations allowed before termination.
+- ```SEED```: the seed for all randomness. If left out, the seed will change each time the Shape Grammar is produced. 
+
+The second type are variables defined using the ```#var``` keyword. These can be used in the rest of the grammar as constant values. Currently SGL supports integers, floats, strings, and booleans as data types and all types are dynamically cast at the time of generation. 
+
 ### Parametrization
 
+Parameters can be passed between different production rules in the same way as traditional functions. The Production rule:
+
+```branch(l)[] : { T(0, l / 2, 0) SS(1, l, 1) PlaceShape("Cylinder") }```
+
+places a cylendar at a distance of ```l / 1``` and a scale of ```l```. Be aware that all types are cast dynamically.
+
 ### Contitionals
+
+Production rules can be turned off and on using conditions. 
 
 ### Randomness
 
