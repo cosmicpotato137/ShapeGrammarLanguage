@@ -30,6 +30,20 @@ This grammar will move up 5 units, scale up by 5 units, rotate 45 degrees, and p
 
 Shape Grammar files are text files formatted with a list of preprocessor definitions at the top followed by a list of production rules separated by a break token (```%%```). SGL starts production with the first production rule in each file, regardless of the name. This means that the first rule must not have any parameters, as their values would be undefined at the start of production. 
 
+### Shape Grammar Driver
+
+Once you have your first grammar, it is run by unity using the ShapeGrammarDriver script. The 
+
 ## Language Features
 
-### Editor Window
+### Parametrization
+
+### Contitionals
+
+### Randomness
+
+## Tips and Tricks
+
+### Pseudo-if-statements
+
+
