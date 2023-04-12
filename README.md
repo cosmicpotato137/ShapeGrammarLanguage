@@ -54,13 +54,17 @@ The second type are variables defined using the ```#var``` keyword. These can be
 
 Parameters can be passed between different production rules in the same way as traditional functions. The following production rule places a cylendar at a distance of ```l / 1``` and a scale of ```l```.
 
-```branch(l)[] : { T(0, l / 2, 0) SS(1, l, 1) PlaceShape("Cylinder") }```
+```
+branch(l)[] : { T(0, l / 2, 0) SS(1, l, 1) PlaceShape("Cylinder") }
+```
 
 ### Contitionals
 
 Production rules can be turned off and on using conditions. This rule only places a branch if the lenth ```l``` is longer than 1. branches will continue to be placed until ```l < 1```.
 
-```branch(l)[l < 1] : { T(0, l / 2, 0) SS(1, l, 1) PlaceShape("Cylinder") branch(l - 0.1)```
+```
+branch(l)[l < 1] : { T(0, l / 2, 0) SS(1, l, 1) PlaceShape("Cylinder") branch(l - 0.1)
+```
 
 ### Randomness
 
