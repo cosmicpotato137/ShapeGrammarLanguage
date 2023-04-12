@@ -48,6 +48,11 @@ namespace cosmicpotato.sgl
             position += rotation * Vector3.Scale(translation, scale);
         }
 
+        public void SetTranslation(Vector3 translation)
+        {
+            position = translation;
+        }
+
         public void Rotate(Vector3 eulerRot)
         {
             Rotate(Quaternion.Euler(eulerRot));

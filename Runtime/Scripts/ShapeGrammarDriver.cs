@@ -52,7 +52,11 @@ namespace cosmicpotato.sgl
                 (parent, x, y, z) => 
                 parent.scope.Translate(Vector3.Scale(new Vector3(x, y, z), transform.lossyScale));
             parser.AddGenerator(new SGGenerator<float, float, float>("T", t));
-
+            //
+            Action<SGProdGen, float, float, float> st = (parent, x, y, z) =>
+            {
+                parent.scope.SetTranslation(Vector3.Scale(new Vector3(x, y, z), transform.lossyScale));
+            };
             // translate local
             Action<SGProdGen, float, float, float> tl = (parent, x, y, z) =>
             {
