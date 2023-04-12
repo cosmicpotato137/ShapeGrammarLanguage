@@ -30,7 +30,7 @@ start()[] : { continue() }
 continue()[] : {  T(0, translate, 0) S(1, 5, 1) R(0, 45, 0) PlaceShape(“Box”) continue() }
 ```
 
-This grammar will move up 5 units, scale up by 5 units, rotate 45 degrees, and place a cube, and repeat this process for 9 iterations. MAX_DEPTH refers to the maximum depth of recursive calls that can be made when producing a gramamr. Recursion happens when start() or continue() makes a call to continue(), so one recursive step is used to reach continue() from start(). In SGL terms, start() and continue() are called a production rules. All operations occuring between the brackets are generator rules. Generators can be geometric operations like T, R, S, PlaceShape, or calls to other production rules. 
+This grammar will move up 5 units, scale up by 5 units, rotate 45 degrees, place a cube, and repeat this process for 9 iterations. MAX_DEPTH refers to the maximum depth of recursive calls that can be made when producing a gramamr. Recursion happens when start() or continue() makes a call to continue(), so one recursive step is used to reach continue() from start(). In SGL terms, start() and continue() are called a production rules. All operations occuring between the brackets are generator rules. Generators can be geometric operations like T, R, S, PlaceShape, or calls to other production rules. 
 
 ### 3.1 File Format
 
