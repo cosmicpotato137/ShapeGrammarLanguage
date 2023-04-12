@@ -14,7 +14,7 @@ When adding this package to Unity use the following link:
 Shape grammars are composed of a set of primitive solids, and a lists of operations called production rules for how to manipulate and place those solids in 2D or 3D space. Production rules are similar to functions as they can be nested, called recursively, and take in parameters.
 Here is an example Shape Grammar file.
 
-```python
+```c++
 #define MAx_DEPTH 10
 #var translate 5
 
