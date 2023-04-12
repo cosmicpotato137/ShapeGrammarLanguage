@@ -519,7 +519,7 @@ namespace cosmicpotato.sgl
 
         public virtual SGGeneratorBase Copy()
         {
-            throw new NotImplementedException();
+            return new SGGeneratorBase(this);
         }
 
         public override void Produce(SGProdGen prodParent, int depth, int maxDepth, int seed)
@@ -750,12 +750,7 @@ namespace cosmicpotato.sgl
 
         public override SGGeneratorBase Copy()
         {
-            var n = new SGGenerator<T1>(token, callback);
-            n.parent = parent;
-            n.depth = depth;
-            n.parameters = parameters;
-
-            return n;
+            return new SGGenerator<T1>(this);
         }
 
         public override void Generate()
@@ -782,12 +777,7 @@ namespace cosmicpotato.sgl
 
         public override SGGeneratorBase Copy()
         {
-            var n = new SGGenerator<T1, T2>(token, callback);
-            n.parent = parent;
-            n.depth = depth;
-            n.parameters = parameters;
-
-            return n;
+            return new SGGenerator<T1, T2>(this);
         }
 
         public override void Generate()
