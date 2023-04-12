@@ -9,6 +9,12 @@ When adding this package to Unity use the following link:
 
 ```https://github.com/msunde137/ShapeGrammarLanguage.git```
 
+## Terminology
+
+- <em>Scope</em> is how SGL keeps track of where and how to place shapes in 2D and 3D space.
+- <em>Generator rules</em> are operations that manipulate the scope, and place shapes.
+- <em>Production rules</em> are composed of one or more lists of generator rules. 
+
 ## Writing Your First Grammar
 
 Shape grammars are composed of a set of primitive solids, and a lists of operations called production rules for how to manipulate and place those solids in 2D or 3D space. Production rules are similar to functions as they can be nested, called recursively, and take in parameters.
@@ -75,4 +81,17 @@ branch(l)[l < 1] :
 (.7){ T(T(0, l / 2, 0) SS(1, l, 1) PlaceShape("Cylinder") branch(l - 0.1) }
 (.3){ T(0, l, 0) branch(l - .1) }
 ```
+
+## Generator Rules
+
+- ```T(x, y, z)``` : translate the scope in local space.
+- ```R(x, y, z)``` : rotate the scope using euler angles in local space.
+- ```S(x, y, z)``` : scale the scope in local space by component-wise multiplication.
+- ```ST(x, y, z)``` : set the translation of the scope in world space.
+- ```SR(x, y, z)``` : set the rotation in world space.
+- ```SS(x, y, z)``` : set the rotation in world space.
+- ```RV()``` : rotate the scope around the local y axis such that the local x axis lies on the x-z plane. 
+- ```Push()``` : push the current scope to a stack.
+- ```Pop()``` : pop the last scope from the stack and set the current scope to it.
+- ```PlaceShape(shape)``` : place a shape at the current scope position.
 
