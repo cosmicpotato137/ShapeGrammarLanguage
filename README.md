@@ -34,7 +34,7 @@ Shape Grammar files are text files formatted with a list of preprocessor definit
 
 Once you have your first grammar, it is run by unity using the ShapeGrammarDriver script. 
 
-<img src="./Samples~/ShapeGrammarDriverInspector.JPG" alt="Shape Grammar Driver Inspector" width="200"/>
+<img src="./Samples~/ShapeGrammarDriverInspector.JPG" alt="Shape Grammar Driver Inspector" width="400"/>
 
 ## Language Features
 
