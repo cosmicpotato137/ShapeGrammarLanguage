@@ -14,15 +14,7 @@ When adding this package to Unity use the following link:
 Shape grammars are composed of a set of primitive solids, and a lists of operations called production rules for how to manipulate and place those solids in 2D or 3D space. Production rules are similar to functions as they can be nested, called recursively, and take in parameters.
 Here is an example Shape Grammar file.
 
-```
-#define MAx_DEPTH 10
-#var translate 5
 
-%%
-start()[] : { continue() }
-
-continue()[] : {  T(0, translate, 0) S(1, 5, 1) R(0, 45, 0) PlaceShape(“Box”) continue() }
-```
 
 This grammar will move up 5 units, scale up by 5 units, rotate 45 degrees, and place a cube, and repeat this process for 9 iterations. MAX_DEPTH refers to the maximum depth of recursive calls that can be made when producing a gramamr. Recursion happens when start() or continue() makes a call to continue(), so one recursive step is used to reach continue() from start(). In SGL terms, start() and continue() are called a production rules. All operations occuring between the brackets are generator rules. Generators can be geometric operations like T, R, S, PlaceShape, or calls to other production rules. 
 
