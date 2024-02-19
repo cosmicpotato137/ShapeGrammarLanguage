@@ -9,6 +9,14 @@ When adding this package to Unity use the following link:
 
 ```https://github.com/msunde137/ShapeGrammarLanguage.git```
 
+This package is dependent on `Microsoft.CSharp.dll` so you need to add it as a pluggin.
+
+1.	In your Unity project, navigate to the Assets directory.
+2.	Create a new folder named Plugins if it doesn't already exist.
+3.	Inside the Plugins folder, create another folder named Managed.
+4.	Add the Microsoft.CSharp.dll file to this Managed folder. You can find this file in the .NET framework directory on your computer. The exact path can vary, but it's usually something like `C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\vX.X\Microsoft.CSharp.dll`.
+5.	Copy the file and paste it into the Managed folder in your Unity project.
+
 ## 2 Terminology
 
 - <em>Scope</em> is how SGL keeps track of where and how to place shapes in 2D and 3D space.
