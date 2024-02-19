@@ -64,7 +64,7 @@ The second type are variables defined using the ```#var``` keyword. These can be
 
 ### 4.2 Parametrization
 
-Parameters can be passed between different production rules in the same way as traditional functions. The following production rule places a cylendar at a distance of `s / 1` and a scale of `s`.
+Parameters can be passed between different production rules in the same way as traditional functions. The following production rule places a cylendar at a distance of `s / 2` and a scale of `s`.
 
 ```
 branch(l)[] : { T(0, s / 2, 0) SS(1, s, 1) PlaceShape("Cylinder") }
