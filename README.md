@@ -64,18 +64,18 @@ The second type are variables defined using the ```#var``` keyword. These can be
 
 ### 4.2 Parametrization
 
-Parameters can be passed between different production rules in the same way as traditional functions. The following production rule places a cylendar at a distance of ```l / 1``` and a scale of ```l```.
+Parameters can be passed between different production rules in the same way as traditional functions. The following production rule places a cylendar at a distance of `s / 1` and a scale of `s`.
 
 ```
-branch(l)[] : { T(0, l / 2, 0) SS(1, l, 1) PlaceShape("Cylinder") }
+branch(l)[] : { T(0, s / 2, 0) SS(1, s, 1) PlaceShape("Cylinder") }
 ```
 
 ### 4.3 Contitionals
 
-Production rules can be turned off and on using conditions. This rule only places a branch if the lenth ```l``` is longer than 1. branches will continue to be placed until ```l < 1```.
+Production rules can be turned off and on using conditions. This rule only places a branch if the lenth `s` is longer than 1. branches will continue to be placed until `s < 1`.
 
 ```
-branch(l)[l < 1] : { T(0, l / 2, 0) SS(1, l, 1) PlaceShape("Cylinder") branch(l - 0.1)
+branch(s)[s < 1] : { T(0, s / 2, 0) SS(1, l, 1) PlaceShape("Cylinder") branch(s - 0.1)
 ```
 
 ### 4.4 Randomness
@@ -83,9 +83,9 @@ branch(l)[l < 1] : { T(0, l / 2, 0) SS(1, l, 1) PlaceShape("Cylinder") branch(l 
 SGL provides the option to randomly choose between production rules using probabilities. The following rule will place a shape 70% of the time, and move up the other 30%.
 
 ```
-branch(l)[l < 1] : 
-(.7){ T(T(0, l / 2, 0) SS(1, l, 1) PlaceShape("Cylinder") branch(l - 0.1) }
-(.3){ T(0, l, 0) branch(l - .1) }
+branch(s)[s < 1] : 
+(.7){ T(T(0, s / 2, 0) SS(1, s, 1) PlaceShape("Cylinder") branch(s - 0.1) }
+(.3){ T(0, s, 0) branch(s - .1) }
 ```
 
 ## 5 Generator Rules
