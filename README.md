@@ -29,7 +29,7 @@ Shape grammars are composed of a set of primitive solids, and a lists of operati
 Here is an example Shape Grammar file.
 
 ```
-#define MAx_DEPTH 10
+#define MAX_DEPTH 10
 #var translate 5
 
 %%
