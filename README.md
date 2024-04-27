@@ -1,4 +1,4 @@
-# ShapeGrammarLanguage
+# Shape Grammar Language
 
 Shape Grammar Language (SGL) is a visual scripting language written for Unity Game engine. It allows complex self similar objects to be encoded as a set of rules describing the transforms of simpler shapes. Designing Shape Grammars is about breaking down a model into components that can be repeated. Rooms in a building or branches of a tree are examples of this. Find out more about shape grammars [here](https://cosmicpotato.tech/res/documents/Procedural_architecture_using_grammars.pdf).
 
